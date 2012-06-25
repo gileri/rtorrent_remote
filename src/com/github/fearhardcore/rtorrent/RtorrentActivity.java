@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -33,7 +34,9 @@ public class RtorrentActivity extends Activity {
 
 	XMLRPCClient client;
 
-	int itemSelected = -1;
+	int itemLongSelected = -1;
+	
+	List<Integer> itemSelected;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -45,12 +48,23 @@ public class RtorrentActivity extends Activity {
 		ad = new TorrentAdapter(this, R.layout.torrent_item, tz);
 		lv = ((ListView) findViewById(R.id.listView1));
 		lv.setAdapter(ad);
+		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				itemLongSelected = (int) id;
+				ad.notifyDataSetChanged();
+				return true;
+			}
+		});
+		
 		lv.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				itemSelected = (int) id;
+				itemSelected.add((int) id);
 				ad.notifyDataSetChanged();
 			}
 		});
@@ -107,7 +121,7 @@ public class RtorrentActivity extends Activity {
 			View v = convertView;
 
 			LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			if (position == itemSelected) {
+			if (position == itemLongSelected) {
 				v = vi.inflate(R.layout.torrent_selected, null);
 				v.findViewById(R.id.button1).setOnClickListener(
 						new OnClickListener() {
@@ -175,8 +189,8 @@ public class RtorrentActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		if (itemSelected != -1) {
-			itemSelected = -1;
+		if (itemLongSelected != -1) {
+			itemLongSelected = -1;
 			ad.notifyDataSetChanged();
 		}
 	}
